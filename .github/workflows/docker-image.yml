@@ -12,6 +12,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Build latest image
         working-directory: src
         run: docker build . --file EscapeCaravan.FastenSeatbelt/Dockerfile --tag nikneem/raspi-escape-fastenseatbelt:latest
+
+      - name: Login to docker hub
+        run: docker login -u nikneem -p ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Login to docker hub
+        run: docker push nikneem/raspi-escape-fastenseatbelt:latest
