@@ -34,23 +34,23 @@ public class StatusLed : ControllerBase
     [HttpPost]
     public IActionResult SetPinStatus(PinStatus dto)
     {
-        Console.WriteLine("Request to set pin {pin}, to status {status}", Pin, dto.Status);
+        Console.WriteLine($"Request to set pin {Pin}, to status {dto.Status}");
 
         if (dto.Pin != Pin)
         {
-            Console.WriteLine("Uncontrollable pin addressed. Returning bad request");
-            return BadRequest("This pin cannot be controlled");
+            Console.WriteLine($"Uncontrollable pin addressed. Returning bad request");
+            return BadRequest($"This pin cannot be controlled");
         }
 
         var desiredPinValue = dto.Status.ToLower().EndsWith("high") ? 
             PinValue.High : PinValue.Low;
-        Console.WriteLine("Desired pin status is now set to {desiredStatus}", desiredPinValue);
+        Console.WriteLine($"Desired pin status is now set to {desiredPinValue}");
 
         var controller = new GpioController();
         controller.OpenPin(Pin, PinMode.Output);
         controller.Write(Pin, desiredPinValue);
         controller.ClosePin(Pin);
-        Console.WriteLine("Setting new pin status succeeded");
+        Console.WriteLine($"Setting new pin status succeeded");
 
         return Ok(new PinStatus()
         {
