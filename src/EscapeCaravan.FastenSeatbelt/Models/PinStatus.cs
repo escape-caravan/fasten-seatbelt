@@ -3,6 +3,6 @@
     public class PinStatus
     {
         public int Pin { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = "";
     }
 }
