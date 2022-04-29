@@ -2,18 +2,16 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build latest image
-      working-directory: src
-      run: docker build . --file EscapeCaravan.FastenSeatbelt\Dockerfile --tag nikneem/raspi-escape-fastenseatbelt:latest
+      - uses: actions/checkout@v3
+      - name: Build latest image
+        working-directory: src
+        run: docker build . --file EscapeCaravan.FastenSeatbelt/Dockerfile --tag nikneem/raspi-escape-fastenseatbelt:latest
