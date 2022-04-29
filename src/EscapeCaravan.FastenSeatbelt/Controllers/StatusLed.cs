@@ -1,6 +1,8 @@
-﻿using System.Device.Gpio;
+﻿//using System.Device.Gpio;
 using EscapeCaravan.FastenSeatbelt.Models;
 using Microsoft.AspNetCore.Mvc;
+using Unosquare.RaspberryIO;
+using Unosquare.RaspberryIO.Abstractions;
 
 namespace EscapeCaravan.FastenSeatbelt.Controllers;
 
@@ -11,53 +13,70 @@ public class StatusLed : ControllerBase
 
     private const int Pin = 17; // GPIO 17 (Physical pin 11)
 
-
     [HttpGet]
     public IActionResult GetPinStatus()
     {
         Console.WriteLine($"Request status of pin {Pin}");
+        var pin = Pi.Gpio[Pin];
 
-        var controller = new GpioController();
-        controller.OpenPin(Pin, PinMode.Input);
-        var pinStatus = controller.Read(Pin);
-        controller.ClosePin(Pin);
+        pin.PinMode = GpioPinDriveMode.Input;
+        var isOn = pin.Read();
+        Console.WriteLine($"Current pin status is {isOn}");
 
-        Console.WriteLine($"Pin status found for pin {Pin}, was {pinStatus}");
         return Ok(new PinStatus
         {
             Pin = Pin,
-            Status = pinStatus.ToString()
+            Status = isOn ? "On": "Off"
         });
     }
 
 
-    [HttpPost]
-    public IActionResult SetPinStatus(PinStatus dto)
-    {
-        Console.WriteLine($"Request to set pin {Pin}, to status {dto.Status}");
+    //[HttpGet]
+    //public IActionResult GetPinStatus()
+    //{
+    //    Console.WriteLine($"Request status of pin {Pin}");
 
-        if (dto.Pin != Pin)
-        {
-            Console.WriteLine($"Uncontrollable pin addressed. Returning bad request");
-            return BadRequest($"This pin cannot be controlled");
-        }
+    //    var controller = new GpioController();
+    //    controller.OpenPin(Pin, PinMode.Input);
+    //    var pinStatus = controller.Read(Pin);
+    //    controller.ClosePin(Pin);
 
-        var desiredPinValue = dto.Status.ToLower().EndsWith("high") ? 
-            PinValue.High : PinValue.Low;
-        Console.WriteLine($"Desired pin status is now set to {desiredPinValue}");
+    //    Console.WriteLine($"Pin status found for pin {Pin}, was {pinStatus}");
+    //    return Ok(new PinStatus
+    //    {
+    //        Pin = Pin,
+    //        Status = pinStatus.ToString()
+    //    });
+    //}
 
-        var controller = new GpioController();
-        controller.OpenPin(Pin, PinMode.Output);
-        controller.Write(Pin, desiredPinValue);
-        controller.ClosePin(Pin);
-        Console.WriteLine($"Setting new pin status succeeded");
 
-        return Ok(new PinStatus()
-        {
-            Pin = Pin,
-            Status = desiredPinValue.ToString()
-        });
-    }
+    //[HttpPost]
+    //public IActionResult SetPinStatus(PinStatus dto)
+    //{
+    //    Console.WriteLine($"Request to set pin {Pin}, to status {dto.Status}");
+
+    //    if (dto.Pin != Pin)
+    //    {
+    //        Console.WriteLine($"Uncontrollable pin addressed. Returning bad request");
+    //        return BadRequest($"This pin cannot be controlled");
+    //    }
+
+    //    var desiredPinValue = dto.Status.ToLower().EndsWith("high") ? 
+    //        PinValue.High : PinValue.Low;
+    //    Console.WriteLine($"Desired pin status is now set to {desiredPinValue}");
+
+    //    var controller = new GpioController();
+    //    controller.OpenPin(Pin, PinMode.Output);
+    //    controller.Write(Pin, desiredPinValue);
+    //    controller.ClosePin(Pin);
+    //    Console.WriteLine($"Setting new pin status succeeded");
+
+    //    return Ok(new PinStatus()
+    //    {
+    //        Pin = Pin,
+    //        Status = desiredPinValue.ToString()
+    //    });
+    //}
 
 
 }
