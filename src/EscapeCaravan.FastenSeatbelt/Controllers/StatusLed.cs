@@ -1,5 +1,5 @@
-﻿using EscapeCaravan.FastenSeatbelt.Models;
-using Iot.Device.CpuTemperature;
+﻿using System.Device.Gpio;
+using EscapeCaravan.FastenSeatbelt.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EscapeCaravan.FastenSeatbelt.Controllers;
@@ -9,31 +9,49 @@ namespace EscapeCaravan.FastenSeatbelt.Controllers;
 public class StatusLed : ControllerBase
 {
 
-    [HttpGet]
-    public IActionResult Get()
-    {
-        using CpuTemperature cpuTemperature = new CpuTemperature();
-        if (cpuTemperature.IsAvailable)
-        {
-            var temperature = cpuTemperature.ReadTemperatures();
-            foreach (var entry in temperature)
-            {
-                if (!double.IsNaN(entry.Temperature.DegreesCelsius))
-                {
-                    return Ok(new TemperatureModel
-                    {
-                        Temperature = entry.Temperature.DegreesCelsius
-                    });
-                }
+    private const int Pin = 17; // GPIO 17 (Physical pin 11)
 
-                return BadRequest("Unable to read Temperature.");
-            }
-        }
-        else
+
+    [HttpGet]
+    public IActionResult GetPinStatus()
+    {
+        var controller = new GpioController();
+
+        controller.OpenPin(Pin, PinMode.Input);
+        var pinStatus = controller.Read(Pin);
+        controller.ClosePin(Pin);
+
+        return Ok(new PinStatus
         {
-            return BadRequest("CPU temperature is not available");
-        }
-        return BadRequest("Unknown error");
+            Pin = Pin,
+            Status = pinStatus.ToString()
+        });
     }
+
+
+    [HttpPost]
+    public IActionResult SetPinStatus(PinStatus dto)
+    {
+        if (dto.Pin != Pin)
+        {
+            return BadRequest("This pin cannot be controlled");
+        }
+
+        var desiredPinValue = dto.Status.ToLower().EndsWith("high") ? 
+            PinValue.High : PinValue.Low;
+
+        var controller = new GpioController();
+
+        controller.OpenPin(Pin, PinMode.Output);
+        controller.Write(Pin, desiredPinValue);
+        controller.ClosePin(Pin);
+
+        return Ok(new PinStatus()
+        {
+            Pin = Pin,
+            Status = desiredPinValue.ToString()
+        });
+    }
+
 
 }
