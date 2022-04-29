@@ -15,14 +15,14 @@ public class StatusLed : ControllerBase
     [HttpGet]
     public IActionResult GetPinStatus()
     {
-        Console.WriteLine("Request status of pin {pin}", Pin);
+        Console.WriteLine($"Request status of pin {Pin}");
 
         var controller = new GpioController();
         controller.OpenPin(Pin, PinMode.Input);
         var pinStatus = controller.Read(Pin);
         controller.ClosePin(Pin);
 
-        Console.WriteLine("Pin status found for pin {pin}, was {status}", Pin, pinStatus);
+        Console.WriteLine($"Pin status found for pin {Pin}, was {pinStatus}");
         return Ok(new PinStatus
         {
             Pin = Pin,
