@@ -1,8 +1,6 @@
-﻿//using System.Device.Gpio;
+﻿using System.Device.Gpio;
 using EscapeCaravan.FastenSeatbelt.Models;
 using Microsoft.AspNetCore.Mvc;
-using Unosquare.RaspberryIO;
-using Unosquare.RaspberryIO.Abstractions;
 
 namespace EscapeCaravan.FastenSeatbelt.Controllers;
 
@@ -13,20 +11,22 @@ public class StatusLed : ControllerBase
 
     private const int Pin = 17; // GPIO 17 (Physical pin 11)
 
+
     [HttpGet]
     public IActionResult GetPinStatus()
     {
-        Console.WriteLine($"Request status of pin {Pin}");
+        Console.WriteLine("Request status of pin {pin}", Pin);
 
-        pin.PinMode = GpioPinDriveMode.Input;
-        var isOn = pin.Read();
-        Console.WriteLine($"Current pin status is {isOn}");
+        var controller = new GpioController();
+        controller.OpenPin(Pin, PinMode.Input);
+        var pinStatus = controller.Read(Pin);
+        controller.ClosePin(Pin);
 
-        Console.WriteLine($"Pin status found for pin {Pin}, was {pinStatus}");
+        Console.WriteLine("Pin status found for pin {pin}, was {status}", Pin, pinStatus);
         return Ok(new PinStatus
         {
             Pin = Pin,
-            Status = isOn ? "On": "Off"
+            Status = pinStatus.ToString()
         });
     }
 
@@ -52,15 +52,12 @@ public class StatusLed : ControllerBase
         controller.ClosePin(Pin);
         Console.WriteLine($"Setting new pin status succeeded");
 
-    //[HttpPost]
-    //public IActionResult SetPinStatus(PinStatus dto)
-    //{
-    //    Console.WriteLine($"Request to set pin {Pin}, to status {dto.Status}");
+        return Ok(new PinStatus()
+        {
+            Pin = Pin,
+            Status = desiredPinValue.ToString()
+        });
+    }
 
-    //    if (dto.Pin != Pin)
-    //    {
-    //        Console.WriteLine($"Uncontrollable pin addressed. Returning bad request");
-    //        return BadRequest($"This pin cannot be controlled");
-    //    }
 
 }
