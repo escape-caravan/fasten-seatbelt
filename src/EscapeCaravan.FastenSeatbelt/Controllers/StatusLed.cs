@@ -17,12 +17,12 @@ public class StatusLed : ControllerBase
     public IActionResult GetPinStatus()
     {
         Console.WriteLine($"Request status of pin {Pin}");
-        var pin = Pi.Gpio[Pin];
 
         pin.PinMode = GpioPinDriveMode.Input;
         var isOn = pin.Read();
         Console.WriteLine($"Current pin status is {isOn}");
 
+        Console.WriteLine($"Pin status found for pin {Pin}, was {pinStatus}");
         return Ok(new PinStatus
         {
             Pin = Pin,
@@ -31,24 +31,26 @@ public class StatusLed : ControllerBase
     }
 
 
-    //[HttpGet]
-    //public IActionResult GetPinStatus()
-    //{
-    //    Console.WriteLine($"Request status of pin {Pin}");
+    [HttpPost]
+    public IActionResult SetPinStatus(PinStatus dto)
+    {
+        Console.WriteLine($"Request to set pin {Pin}, to status {dto.Status}");
 
-    //    var controller = new GpioController();
-    //    controller.OpenPin(Pin, PinMode.Input);
-    //    var pinStatus = controller.Read(Pin);
-    //    controller.ClosePin(Pin);
+        if (dto.Pin != Pin)
+        {
+            Console.WriteLine($"Uncontrollable pin addressed. Returning bad request");
+            return BadRequest($"This pin cannot be controlled");
+        }
 
-    //    Console.WriteLine($"Pin status found for pin {Pin}, was {pinStatus}");
-    //    return Ok(new PinStatus
-    //    {
-    //        Pin = Pin,
-    //        Status = pinStatus.ToString()
-    //    });
-    //}
+        var desiredPinValue = dto.Status.ToLower().EndsWith("high") ? 
+            PinValue.High : PinValue.Low;
+        Console.WriteLine($"Desired pin status is now set to {desiredPinValue}");
 
+        var controller = new GpioController();
+        controller.OpenPin(Pin, PinMode.Output);
+        controller.Write(Pin, desiredPinValue);
+        controller.ClosePin(Pin);
+        Console.WriteLine($"Setting new pin status succeeded");
 
     //[HttpPost]
     //public IActionResult SetPinStatus(PinStatus dto)
@@ -60,23 +62,5 @@ public class StatusLed : ControllerBase
     //        Console.WriteLine($"Uncontrollable pin addressed. Returning bad request");
     //        return BadRequest($"This pin cannot be controlled");
     //    }
-
-    //    var desiredPinValue = dto.Status.ToLower().EndsWith("high") ? 
-    //        PinValue.High : PinValue.Low;
-    //    Console.WriteLine($"Desired pin status is now set to {desiredPinValue}");
-
-    //    var controller = new GpioController();
-    //    controller.OpenPin(Pin, PinMode.Output);
-    //    controller.Write(Pin, desiredPinValue);
-    //    controller.ClosePin(Pin);
-    //    Console.WriteLine($"Setting new pin status succeeded");
-
-    //    return Ok(new PinStatus()
-    //    {
-    //        Pin = Pin,
-    //        Status = desiredPinValue.ToString()
-    //    });
-    //}
-
 
 }
