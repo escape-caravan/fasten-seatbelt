@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+
+COPY *.sln .
+COPY EscapeCaravan.FastenSeatbelt/*.csproj ./EscapeCaravan.FastenSeatbelt/
+RUN dotnet restore -r linux-musl-arm
+
+COPY EscapeCaravan.FastenSeatbelt/. ./EscapeCaravan.FastenSeatbelt/
+WORKDIR /src
+RUN dotnet publish EscapeCaravan.FastenSeatbelt/EscapeCaravan.FastenSeatbelt.csproj -c release -o /app -r linux-musl-arm --self-contained false --no-restore
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine-arm32v8
+WORKDIR /app
+COPY --from=build /app ./
+
+ENTRYPOINT ["dotnet", "EscapeCaravan.FastenSeatbelt.dll"]
