@@ -1,4 +1,5 @@
 ﻿using System.Device.Gpio;
+using System.Device.Gpio.Drivers;
 using EscapeCaravan.FastenSeatbelt.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +18,8 @@ public class StatusLed : ControllerBase
     {
         Console.WriteLine($"Request status of pin {Pin}");
 
-        var controller = new GpioController();
+        var controller = new GpioController(PinNumberingScheme.Logical, new RaspberryPi3Driver() );
+        
         controller.OpenPin(Pin, PinMode.Input);
         var pinStatus = controller.Read(Pin);
         controller.ClosePin(Pin);
