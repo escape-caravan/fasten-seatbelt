@@ -10,7 +10,7 @@ namespace EscapeCaravan.FastenSeatbelt.Controllers;
 public class StatusLed : ControllerBase
 {
 
-    private const int Pin = 17; // GPIO 17 (Physical pin 11)
+    private const int Pin = 7; // GPIO 17 (Physical pin 11)
 
 
     [HttpGet]
